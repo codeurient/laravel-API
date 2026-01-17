@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,3 +14,6 @@ Route::get('/hello', function () {
         "message" => "Hello Laravel API"
     ];
 });
+
+
+Route::apiResource('posts',  PostController::class);
