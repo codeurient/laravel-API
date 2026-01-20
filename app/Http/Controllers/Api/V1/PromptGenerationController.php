@@ -14,16 +14,22 @@ class PromptGenerationController extends Controller
 
     public function __construct(private OpenAiService $openAiService) {}
 
+    public function index(Request $request)
+    {
+        $user  = $request->user();
+        $imageGenerations = $user->imageGenerations()->latest()->paginate(10);
+        return ImageGenerationResource::collection($imageGenerations);
+    }
+
     public function store(GeneratePromptRequest $request)
     {
         $user            = $request->user();
+        
         $image           = $request->file('image');
-
         $originalName    = $image->getClientOriginalName();
-        $sanitizedName   = preg_replace('/[^a-zA-Z0-9._-]/', '_', pathinfo($originalName, PATHINFO_FILENAME)); // something.png -> something.png
+        $sanitizedName   = preg_replace('/[^a-zA-Z0-9._-]/', '_', pathinfo($originalName, PATHINFO_FILENAME)); 
         $extension       = $image->getClientOriginalExtension();
         $safeFilename    = $sanitizedName . '_' . Str::random(32) . '.' . $extension;
-
         $imagePath       = $image->storeAs('uploads/images', $safeFilename, 'public');
 
         $generatedPrompt = $this->openAiService->generatePromptFromImage($image);
