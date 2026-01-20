@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\PostController;
+use App\Http\Controllers\Api\V1\PromptGenerationController;
 
 
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function() {
@@ -14,6 +15,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function() {
     Route::prefix('v1')->group(function() {
         Route::apiResource('posts',  PostController::class);
     });
+
+    Route::apiResource('prompt-generations', PromptGenerationController::class)->only(['index', 'store']);
 
 });
 
