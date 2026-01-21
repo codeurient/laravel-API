@@ -33,6 +33,11 @@ class PromptGenerationController extends Controller
         $user  = $request->user();
         $query = $user->imageGenerations();
 
+        // Apply search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('generated_prompt', 'LIKE', '%' . $request->search . '%');
+        }
+
         $imageGenerations = $query->paginate($request->get('per_page'));
         return ImageGenerationResource::collection($imageGenerations);
     }
