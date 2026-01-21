@@ -38,6 +38,30 @@ class PromptGenerationController extends Controller
             $query->where('generated_prompt', 'LIKE', '%' . $request->search . '%');
         }
 
+        // Apply sorting
+        $allowedSortFields = ['created_at', 'generated_prompt', 'original_filename', 'file_size'];
+        $sortField = 'created_at';
+        $sortDirection = 'desc';
+
+        if ($request->has('sort') && !empty($request->sort)) {
+            $sort = $request->sort;
+            if (str_starts_with($sort, '-')) {
+                $sortField = substr($sort, 1);
+                $sortDirection = 'desc';
+            } else {
+                $sortField = $sort;
+                $sortDirection = 'asc';
+            }
+        }
+
+        // Validate sort field
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'created_at';
+            $sortDirection = 'desc';
+        }
+
+        $query->orderBy($sortField, $sortDirection);
+
         $imageGenerations = $query->paginate($request->get('per_page'));
         return ImageGenerationResource::collection($imageGenerations);
     }
