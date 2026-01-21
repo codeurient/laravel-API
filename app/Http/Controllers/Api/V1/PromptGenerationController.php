@@ -14,12 +14,41 @@ class PromptGenerationController extends Controller
 
     public function __construct(private OpenAiService $openAiService) {}
 
+    /**
+     * List Image Generations
+     *
+     * Retrieve a paginated list of all image generations created by the authenticated user.
+     * Supports filtering by generated prompt and sorting by various fields.
+     *
+     * Query Parameters:
+     * - search: Search term to filter by generated_prompt field
+     * - sort: Field name with optional '-' prefix for descending order
+     *   Examples: 'created_at', '-created_at', 'generated_prompt', '-file_size'
+     *
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+
     public function index(Request $request)
     {
         $user  = $request->user();
-        $imageGenerations = $user->imageGenerations()->latest()->paginate(10);
+        $query = $user->imageGenerations();
+
+        $imageGenerations = $query->paginate($request->get('per_page'));
         return ImageGenerationResource::collection($imageGenerations);
     }
+
+    /**
+     * Generate Prompt from Image
+     *
+     * Upload an image and generate a descriptive prompt using AI. The system will:
+     * - Store the uploaded image securely
+     * - Process it with OpenAI's vision model
+     * - Generate a detailed descriptive prompt
+     * - Save the generation history for the authenticated user
+     *
+     * @param \App\Http\Requests\GeneratePromptRequest $request
+     * @return ImageGenerationResource
+     */
 
     public function store(GeneratePromptRequest $request)
     {
